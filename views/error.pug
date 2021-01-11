@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1= payload.message
+  h2= payload.statusCode
+  pre #{data}
+  pre #{stack}
