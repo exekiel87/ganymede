@@ -24,7 +24,19 @@ const ThemistoController = require('./controllers/themistoController');
 
 const ProductRoute = require('./routes/product');
 const ApiRoute  = require('./routes/api');
-const themisto  = require('./themisto');
+//const themisto  = require('./themisto');
+
+const {fork} = require('child_process');
+const {themisto: themistoEnv} = require('./configs/config');
+const themisto =   fork(
+                    './themisto/index.js',
+                    [],
+                    {
+                        stdio:'ignore' ,
+                        env: themistoEnv
+                    }
+                );
+
 
 module.exports = async function run(dbConf){
 
@@ -52,6 +64,7 @@ module.exports = async function run(dbConf){
   const apiRoute = ApiRoute();
 
   themisto.on('message', (res) => {
+  
     const {type, data} = res;
     const {order, products} = data;
 

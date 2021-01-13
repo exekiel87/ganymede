@@ -7,7 +7,7 @@ const {
   NODE_ENV,PORT,
   DB_URL,DB_NAME, 
   REDIS_PORT, REDIS_HOST, 
-  REDIS_DB} = process.env;
+  REDIS_DB, CONCURRENCY_JOBS} = process.env;
 
 const config = {
   NODE_ENV,
@@ -19,7 +19,8 @@ const config = {
   themisto:{
     REDIS_PORT,
     REDIS_HOST,
-    REDIS_DB
+    REDIS_DB,
+    CONCURRENCY_JOBS
   }
 };
 
