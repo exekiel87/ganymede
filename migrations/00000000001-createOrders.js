@@ -4,7 +4,7 @@ module.exports = {
                 validator: {
                     $jsonSchema: {
                         bsonType: 'object',
-                        required: ['query', 'provider','callbackUrl'],
+                        required: ['query', 'provider','callbackUrl','status'],
                         properties:{
                             query:{
                                 bsonType: 'string'

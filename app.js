@@ -14,14 +14,17 @@ const Client = require('./connect');
 
 const Orders = require('./models/orders');
 const Products = require('./models/products');
+const Categories = require('./models/categories');
 
 const Validations = require('./schemas/product');
 
 const OrdersController = require('./controllers/OrdersController');
 const ProductsController = require('./controllers/ProductsController');
+const ThemistoController = require('./controllers/themistoController');
 
 const ProductRoute = require('./routes/product');
 const ApiRoute  = require('./routes/api');
+const themisto  = require('./themisto');
 
 module.exports = async function run(dbConf){
 
@@ -35,16 +38,41 @@ module.exports = async function run(dbConf){
 
   const orders = Orders(db);
   const products = Products(db);
+  const categories = Categories(db);
 
-  const models = {orders, products};
+  const models = {orders, products, categories};
 
   const ordersController = OrdersController(models);
   const productsController = ProductsController(models);
+  const themistoController = ThemistoController(models);
 
   const validations = Validations();
 
-  const productRoute = ProductRoute(ordersController, productsController, validations);
+  const productRoute = ProductRoute(ordersController, productsController, validations, themisto);
   const apiRoute = ApiRoute();
+
+  themisto.on('message', (res) => {
+    const {type, data} = res;
+    const {order, products} = data;
+
+    switch(type){
+        case 1:{
+          themistoController.orderProcessingAction(order);
+        }
+
+        case 2:{
+          themistoController.orderCompletedAction(order, products);
+        }
+
+        case "error":{
+          themistoController.orderFailAction(order);
+        }
+
+        case "typeError":{
+          themistoController.orderInvalidAction(order);
+        }
+    }
+  });
 
   apiRoute.use(productRoute);
 

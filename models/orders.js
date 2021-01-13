@@ -3,8 +3,8 @@ const mongodb = require('mongodb');
 module.exports = function(db){
     const Orders = db.collection('orders');
 
-    function insertOne(search){
-        return Orders.insertOne(search);
+    function insertOne(doc){
+        return Orders.insertOne(doc);
     }
 
     function findOne(_id){
@@ -17,9 +17,17 @@ module.exports = function(db){
         return Orders.find();
     }
 
+    function updateOne(_id, doc){
+        _id = new mongodb.ObjectID(_id);
+        delete doc._id;
+
+        return Orders.updateOne({_id},{"$set":doc});
+    }
+
     return {
         insertOne,
         findOne,
-        findAll
+        findAll,
+        updateOne
     }
 }

@@ -35,7 +35,7 @@ function clientErrorHandler(err, req, res, next)
     const {data,output: {statusCode, payload} } = err;
     
     //cath errors for ajax request or if errors ocurrs while streaming    
-    if(isReqAjaxOrApi(req) || res.headerSent){console.log('statuuuus ', statusCode);
+    if(isReqAjaxOrApi(req) || res.headerSent){
         res.status(statusCode).json(withErrorStack({payload, data}, err.stack));
     }else{
         next(err);

@@ -12,7 +12,7 @@ let created = false;
 
 let router;
 
-module.exports = function run(OrdersController, ProductsController, validations){
+module.exports = function run(OrdersController, ProductsController, validations, themisto){
 
     if(router) return router;
 
@@ -32,7 +32,9 @@ module.exports = function run(OrdersController, ProductsController, validations)
                 
                 const result = await OrdersController.insertOneAction(search);
                 
-                const order = result.ops[0];
+                const order = result.insertedId;
+
+                themisto.send(order);
 
         	    res.status(200).send({order});
             }
