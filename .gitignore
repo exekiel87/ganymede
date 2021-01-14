@@ -1,3 +1,6 @@
 node_modules
 .env
 testmongo.js
+.dockerignore
+docker-compose.yml
+Dockerfile

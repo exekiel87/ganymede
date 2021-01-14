@@ -1,4 +1,4 @@
-const conf = require('../configs/config');
+const conf = require('../../configs/config');
 const Joi = require('joi');
 const { providers } = require('../configs/config');
 

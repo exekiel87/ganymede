@@ -28,7 +28,7 @@ const ApiRoute  = require('./routes/api');
 
 const {fork} = require('child_process');
 const {themisto: themistoEnv} = require('./configs/config');
-const themisto =   fork(
+let themisto =   fork(
                     './themisto/index.js',
                     [],
                     {
@@ -41,7 +41,7 @@ const themisto =   fork(
 module.exports = async function run(dbConf){
 
   const client = Client(dbConf.DB_URL, dbConf.DB_NAME);
-
+  
   const connected = await client.connect();
 
   const ping = await client.ping();

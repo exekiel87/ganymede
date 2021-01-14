@@ -1,7 +1,7 @@
-if (process.env.NODE_ENV !== 'production')
+/*if (process.env.NODE_ENV !== 'production')
 {
   require('dotenv').config();
-}
+}*/
 
 const {
   NODE_ENV,PORT,
@@ -16,12 +16,13 @@ const config = {
     DB_URL,
     DB_NAME
   },
-  themisto:{
-    REDIS_PORT,
-    REDIS_HOST,
-    REDIS_DB,
-    CONCURRENCY_JOBS
-  }
+  redis: {
+    port: REDIS_PORT,
+    host: REDIS_HOST,
+    db: REDIS_DB,
+  },
+  providers: ['easy'],
+  CONCURRENCY_JOBS
 };
 
 module.exports = config;
