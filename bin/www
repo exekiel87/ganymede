@@ -12,7 +12,7 @@ const conf = require('../configs/config');
 
 (async () =>{
 
-  const app = await App(conf.DB_CONF);
+  const app = await App(conf.DB_CONF, conf.queues);
   /**
    * Get port from environment and store in Express.
    */

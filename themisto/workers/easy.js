@@ -8,8 +8,20 @@ module.exports = function(){
     async function searchEasyProducts(data){
         query = data.query;
         
-        browser = await puppeteer.launch();    
+        browser = await puppeteer.launch({
+            //headless: false,
+            executablePath: 'google-chrome-stable',
+            args: [
+              // Required for Docker version of Puppeteer
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              // This will write shared memory files into /tmp instead of /dev/shm,
+              // because Docker’s default for /dev/shm is 64MB
+              '--disable-dev-shm-usage'
+            ]
+          });    
         page = await browser.newPage();
+        await page.setDefaultNavigationTimeout(0);
 
         const links = await getLinks();
 
@@ -98,7 +110,7 @@ module.exports = function(){
 
             originalPrice = Number.parseFloat(originalPrice);
             
-            if(price === NaN){
+            if(price !==0 && !price){
                 price = originalPrice;
                 originalPrice = null;
             }

@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 const bodyParser = require('body-parser');
 const Boom = require('@hapi/boom');
+//const Bull = require('bull');
+//sconst Arena = require('bull-arena');
 
 const isReqAjaxOrApi = require('./utils/isReqAjaxOrApi');
 const {wrapErrors, logErrors, clientErrorHandler, errorHandler} = require('./utils/middlewares/errorHandler');
@@ -27,18 +29,42 @@ const ApiRoute  = require('./routes/api');
 //const themisto  = require('./themisto');
 
 const {fork} = require('child_process');
-const {themisto: themistoEnv} = require('./configs/config');
+const {DB_CONF,themisto: themistoEnv} = require('./configs/config');
 let themisto =   fork(
                     './themisto/index.js',
                     [],
                     {
-                        stdio:'ignore' ,
-                        env: themistoEnv
+                        stdio: 'inherit',
+                        env: {
+                          REDIS_PORT:themistoEnv.redis.port,
+                          REDIS_HOST:themistoEnv.redis.host,
+                          REDIS_DB:themistoEnv.redis.db,
+                          CONCURRENCY_JOBS:themistoEnv.CONCURRENCY_JOBS
+                        }
+                    }
+                );
+
+let saver =   fork(
+                    './saver/index.js',
+                    [],
+                    {
+                        stdio: 'inherit',
+                        env: {
+                          REDIS_PORT:themistoEnv.redis.port,
+                          REDIS_HOST:themistoEnv.redis.host,
+                          REDIS_DB:themistoEnv.redis.db,
+                          CONCURRENCY_JOBS:themistoEnv.CONCURRENCY_JOBS,
+                          DB_URL: DB_CONF.DB_URL,
+                          DB_NAME:DB_CONF.DB_NAME
+                        }
                     }
                 );
 
 
-module.exports = async function run(dbConf){
+themisto.on('error',(err) =>{
+  
+});
+module.exports = async function run(dbConf,queues){
 
   const client = Client(dbConf.DB_URL, dbConf.DB_NAME);
   
@@ -63,28 +89,38 @@ module.exports = async function run(dbConf){
   const productRoute = ProductRoute(ordersController, productsController, validations, themisto);
   const apiRoute = ApiRoute();
 
-  themisto.on('message', (res) => {
+  themisto.on('message',async (res) => {
   
     const {type, data} = res;
     const {order, products} = data;
-
+    let result;
+    try{
     switch(type){
         case 1:{
-          themistoController.orderProcessingAction(order);
+          result = await themistoController.orderProcessingAction(order);
+          break;
         }
 
         case 2:{
-          themistoController.orderCompletedAction(order, products);
+          //result = await themistoController.orderCompletedAction(order, products);
+          saver.send({_id:order,products});
+          break;
         }
 
         case "error":{
-          themistoController.orderFailAction(order);
+          result = await themistoController.orderFailAction(order);
+          break;
         }
 
         case "typeError":{
-          themistoController.orderInvalidAction(order);
+          result = await themistoController.orderInvalidAction(order);
+          break;
         }
     }
+
+  }catch (err){
+    
+  }
   });
 
   apiRoute.use(productRoute);
@@ -103,6 +139,19 @@ module.exports = async function run(dbConf){
   app.use(express.static(path.join(__dirname, 'public')));
   
   app.use('/', apiRoute);
+/*
+  const arenaConfig = Arena(
+    {
+      Bull,
+      queues,
+    },
+    {
+      basePath: '/arena',
+      disableListen: true,
+    }
+  );
+
+  app.use('/', arenaConfig);*/
   /*
   app.use(function(req, res, next){
     next(Boom.notFound());

@@ -32,11 +32,14 @@ module.exports = function run(OrdersController, ProductsController, validations,
                 
                 const result = await OrdersController.insertOneAction(search);
                 
-                const order = result.insertedId;
+                const _id = result.insertedId;
 
-                themisto.send(order);
+                delete search.callbackUrl;
+                delete search.status;
 
-        	    res.status(200).send({order});
+                themisto.send({...search, _id});
+
+        	    res.status(200).send({order:_id});
             }
             catch (err)
             {

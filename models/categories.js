@@ -8,7 +8,7 @@ module.exports = function(db){
     }
 
     function findOne(url){
-        return Orders.findOne({url});
+        return Categories.findOne({url});
     }   
 
     return {
