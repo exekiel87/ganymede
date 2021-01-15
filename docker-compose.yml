@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  ganymede:
+    build: .
+    environment:
+      - "NODE_ENV=production"
+      - "DB_URL=mongodb://dbmongo:27017/"
+      - "DB_NAME=storedb"
+      - "REDIS_PORT=6379"
+      - "REDIS_HOST=dbredis"
+      - "REDIS_DB=0"
+      - "CONCURRENCY_JOBS=1"
+    depends_on:
+      - dbmongo
+      - dbredis
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src
+      - /usr/src/node_modules
+  dbmongo:
+    image: mongo:4.4.3
+    restart: always
+    volumes:
+      - "/var/www/data/mongoData:/data/db"
+  dbredis:
+    image: redis:6.0.9
+    volumes:
+      - "/var/www/data/redisData:/data"
+    ports:
+      - "6380:6379"
+#  arena:
+#    image: mixmaxhq/arena:v3.6.2
+#    volumes:
+#      - "/var/www/arena/index.json:/opt/arena/src/server/config/index.json"
+#    depends_on:
+#      - dbredis
+#    ports:
+#      - "3005:4567"
